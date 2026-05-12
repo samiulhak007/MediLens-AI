@@ -80,11 +80,16 @@ If any field is not visible, set it to null. Never fabricate information. Return
           messages: [
             {
               role: 'system',
-              content: `You are MediLens AI, an expert medical assistant. The user will provide a medicine name or a short description of their symptoms. You MUST return exactly 2 medicine recommendations or related variations in an array format inside a JSON object. Return ONLY a valid JSON object with this exact structure:
+              content: `You are MediLens AI, an expert medical assistant. The user will provide a medicine name (which might have typos) or a short description of their symptoms. 
+              Even if the user misspells the medicine name (e.g., "paracetomal" for "paracetamol"), you must identify the correct intended medicine.
+              You MUST return exactly 2 medicine entries in an array format inside a JSON object. 
+              The first entry should be the most likely intended medicine. The second should be a related alternative or common variation.
+              Return ONLY a valid JSON object with no markdown formatting, no backticks, and no extra text.
+              Structure:
 {
   "medicines": [
     {
-      "name": "",
+      "name": "Corrected Medicine Name",
       "generic_name": "",
       "category": "",
       "common_uses": [],
@@ -92,10 +97,11 @@ If any field is not visible, set it to null. Never fabricate information. Return
       "side_effects": [],
       "warnings": [],
       "alternatives": []
-    }
+    },
+    { ... }
   ]
 }
-Always provide the response in ${language}. Never fabricate information. Return ONLY the JSON object.`
+Always provide the response in ${language}.`
             },
             {
               role: 'user',
