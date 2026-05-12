@@ -135,7 +135,47 @@ If any field is not visible, set it to null. Never fabricate information. Return
     }
   };
 
-  return { analyzePrescription, searchMedicine, analyzing, error };
+  const chatWithAI = async (messages, context = null) => {
+    setAnalyzing(true);
+    setError(null);
+    try {
+      const systemMessage = {
+        role: 'system',
+        content: `You are MediLens AI, a helpful and empathetic medical assistant. 
+        You help users understand their prescriptions and medicines. 
+        Always answer in clear plain language. 
+        Always end medical answers with: This is for informational purposes only. Please consult your doctor for medical advice. 
+        Never diagnose conditions. Be supportive and reassuring.
+        ${context ? `Context about the user's current medicine/prescription: ${JSON.stringify(context)}` : ''}`
+      };
+
+      const response = await axios.post(
+        'https://api.groq.com/openai/v1/chat/completions',
+        {
+          model: 'llama-3.1-70b-versatile',
+          messages: [systemMessage, ...messages],
+          temperature: 0.5,
+          max_tokens: 1024
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${import.meta.env.VITE_GROQ_API_KEY}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      return response.data.choices[0].message.content;
+    } catch (err) {
+      console.error("Groq Chat Error:", err);
+      setError(err.message);
+      throw err;
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  return { analyzePrescription, searchMedicine, chatWithAI, analyzing, error };
 };
 
 export default useGroq;
