@@ -4,6 +4,7 @@ import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import { Users, BarChart3, Database, ShieldCheck, Search, Download, Trash2, Edit2, Eye } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import Button from '../components/ui/Button';
 
 const Admin = () => {
   const userStats = [
