@@ -152,7 +152,7 @@ If any field is not visible, set it to null. Never fabricate information. Return
       const response = await axios.post(
         'https://api.groq.com/openai/v1/chat/completions',
         {
-          model: 'llama-3.1-70b-versatile',
+          model: 'llama3-70b-8192',
           messages: [systemMessage, ...messages],
           temperature: 0.5,
           max_tokens: 1024
