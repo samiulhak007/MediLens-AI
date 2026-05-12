@@ -191,24 +191,24 @@ If any field is not visible, set it to null. Never fabricate information. Return
               role: 'system',
               content: `You are a pharmaceutical price comparison expert. 
               Given a medicine name, return a JSON object containing:
-              1. The brand name price range (USD or local currency).
-              2. At least 3 generic alternatives with their price ranges.
+              1. The brand name price range in Indian Rupees (₹).
+              2. At least 3 generic alternatives with their price ranges in ₹.
               3. Potential savings percentage.
-              4. Brief advice on how to save money on this medication.
+              4. Brief advice on how to save money on this medication in the Indian market (e.g., Jan Aushadhi).
               
               JSON Structure:
               {
                 "medicine": "Brand Name",
-                "brand_price": "$100 - $150",
+                "brand_price": "₹100 - ₹150",
                 "generics": [
-                  { "name": "Generic 1", "price": "$10 - $20", "savings": "85%" },
-                  { "name": "Generic 2", "price": "$12 - $22", "savings": "82%" },
-                  { "name": "Generic 3", "price": "$8 - $18", "savings": "88%" }
+                  { "name": "Generic 1", "price": "₹10 - ₹20", "savings": "85%" },
+                  { "name": "Generic 2", "price": "₹12 - ₹22", "savings": "82%" },
+                  { "name": "Generic 3", "price": "₹8 - ₹18", "savings": "88%" }
                 ],
                 "savings_insight": "...",
                 "tips": ["Tip 1", "Tip 2"]
               }
-              Return ONLY the JSON.`
+              Return ONLY the JSON. Always use ₹ symbol.`
             },
             {
               role: 'user',
