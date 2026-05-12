@@ -142,7 +142,6 @@ If any field is not visible, set it to null. Never fabricate information. Return
       setAnalyzing(false);
     }
   };
-  };
 
   return { analyzePrescription, searchMedicine, analyzing, error };
 };
