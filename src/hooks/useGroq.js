@@ -178,7 +178,65 @@ If any field is not visible, set it to null. Never fabricate information. Return
     }
   };
 
-  return { analyzePrescription, searchMedicine, chatWithAI, analyzing, error };
+  const comparePrices = async (medicineName) => {
+    setAnalyzing(true);
+    setError(null);
+    try {
+      const response = await axios.post(
+        'https://api.groq.com/openai/v1/chat/completions',
+        {
+          model: 'llama-3.1-8b-instant',
+          messages: [
+            {
+              role: 'system',
+              content: `You are a pharmaceutical price comparison expert. 
+              Given a medicine name, return a JSON object containing:
+              1. The brand name price range (USD or local currency).
+              2. At least 3 generic alternatives with their price ranges.
+              3. Potential savings percentage.
+              4. Brief advice on how to save money on this medication.
+              
+              JSON Structure:
+              {
+                "medicine": "Brand Name",
+                "brand_price": "$100 - $150",
+                "generics": [
+                  { "name": "Generic 1", "price": "$10 - $20", "savings": "85%" },
+                  { "name": "Generic 2", "price": "$12 - $22", "savings": "82%" },
+                  { "name": "Generic 3", "price": "$8 - $18", "savings": "88%" }
+                ],
+                "savings_insight": "...",
+                "tips": ["Tip 1", "Tip 2"]
+              }
+              Return ONLY the JSON.`
+            },
+            {
+              role: 'user',
+              content: `Compare prices for: ${medicineName}`
+            }
+          ],
+          temperature: 0.1,
+          response_format: { type: "json_object" }
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${import.meta.env.VITE_GROQ_API_KEY}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      return JSON.parse(response.data.choices[0].message.content);
+    } catch (err) {
+      console.error("Groq Price Comparison Error:", err);
+      setError(err.message);
+      throw err;
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  return { analyzePrescription, searchMedicine, chatWithAI, comparePrices, analyzing, error };
 };
 
 export default useGroq;

@@ -13,6 +13,7 @@ import Chat from './pages/Chat';
 import Reminders from './pages/Reminders';
 import EmergencyCard from './pages/EmergencyCard';
 import HealthScore from './pages/HealthScore';
+import PriceComparison from './pages/PriceComparison';
 import History from './pages/History';
 import Profile from './pages/Profile';
 import Admin from './pages/Admin';
@@ -83,6 +84,15 @@ function App() {
               element={
                 <ProtectedRoute>
                   <HealthScore />
+                </ProtectedRoute>
+              } 
+            />
+
+            <Route 
+              path="/price-comparison" 
+              element={
+                <ProtectedRoute>
+                  <PriceComparison />
                 </ProtectedRoute>
               } 
             />

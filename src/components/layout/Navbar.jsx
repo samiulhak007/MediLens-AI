@@ -14,7 +14,8 @@ import {
   Bell,
   Menu,
   X,
-  MessageSquare
+  MessageSquare,
+  Tag
 } from 'lucide-react';
 import Button from '../ui/Button';
 
@@ -48,6 +49,7 @@ const Navbar = () => {
     { name: 'Chat', path: '/chat', icon: MessageSquare },
     { name: 'Reminders', path: '/reminders', icon: Bell },
     { name: 'Emergency Card', path: '/emergency-card', icon: ShieldCheck },
+    { name: 'Price Compare', path: '/price-comparison', icon: Tag },
     { name: 'Health Score', path: '/health-score', icon: History },
     { name: 'Profile', path: '/profile', icon: User },
   ];
