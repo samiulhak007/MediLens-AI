@@ -76,20 +76,24 @@ If any field is not visible, set it to null. Never fabricate information. Return
       const response = await axios.post(
         'https://api.groq.com/openai/v1/chat/completions',
         {
-          model: 'llama3-70b-8192',
+          model: 'llama-3.1-70b-versatile',
           messages: [
             {
               role: 'system',
-              content: `You are MediLens AI, an expert medical assistant. The user will provide a medicine name or a short description of their symptoms. Identify the medicine or suggest appropriate over-the-counter options if they ask for symptoms. Return ONLY a valid JSON object with this exact structure:
+              content: `You are MediLens AI, an expert medical assistant. The user will provide a medicine name or a short description of their symptoms. You MUST return exactly 2 medicine recommendations or related variations in an array format inside a JSON object. Return ONLY a valid JSON object with this exact structure:
 {
-  "name": "",
-  "generic_name": "",
-  "category": "",
-  "common_uses": [],
-  "how_it_works": "",
-  "side_effects": [],
-  "warnings": [],
-  "alternatives": []
+  "medicines": [
+    {
+      "name": "",
+      "generic_name": "",
+      "category": "",
+      "common_uses": [],
+      "how_it_works": "",
+      "side_effects": [],
+      "warnings": [],
+      "alternatives": []
+    }
+  ]
 }
 Always provide the response in ${language}. Never fabricate information. Return ONLY the JSON object.`
             },
