@@ -15,7 +15,8 @@ import {
   Trash2, 
   FileText,
   Download,
-  Share2
+  Share2,
+  History as HistoryIcon
 } from 'lucide-react';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
@@ -27,6 +28,7 @@ import { generatePDF } from '../utils/generatePDF';
 
 const History = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -78,46 +80,50 @@ const History = () => {
   };
 
   return (
-    <div className="min-h-screen bg-brand-navy">
-      <Navbar />
+    <div className="min-h-screen bg-brand-navy bg-[url('https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center bg-fixed bg-no-repeat relative">
+      {/* Heavy Glassmorphism Overlay */}
+      <div className="absolute inset-0 bg-brand-navy/90 backdrop-blur-xl"></div>
       
-      <main className="container mx-auto px-4 pt-32 pb-20">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-6">
-          <div>
-            <h1 className="text-4xl font-syne font-extrabold text-white mb-2">Prescription History</h1>
-            <p className="text-white/50">View and manage your previous analyses.</p>
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 w-5 h-5" />
-              <input 
-                type="text" 
-                placeholder="Search by medicine or patient..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="bg-white/5 border border-white/10 rounded-xl py-2.5 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-brand-cyan w-full md:w-64"
-              />
+      <div className="relative z-10">
+        <Navbar />
+        
+        <main className="container mx-auto px-4 pt-32 pb-20">
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-6">
+            <div>
+              <h1 className="text-4xl font-syne font-extrabold text-white mb-2">Prescription History</h1>
+              <p className="text-white/50">View and manage your previous analyses.</p>
             </div>
-            <Button variant="secondary" icon={Download}>Export All</Button>
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 w-5 h-5" />
+                <input 
+                  type="text" 
+                  placeholder="Search by medicine or patient..." 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="bg-white/5 border border-white/10 rounded-xl py-2.5 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-brand-cyan w-full md:w-64"
+                />
+              </div>
+              <Button variant="secondary" icon={Download}>Export All</Button>
+            </div>
           </div>
-        </div>
 
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="h-64 bg-white/5 rounded-2xl animate-pulse" />
-            ))}
-          </div>
-        ) : filteredRecords.length === 0 ? (
-          <Card className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6">
-              <History className="w-10 h-10 text-white/20" />
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="h-64 bg-white/5 rounded-2xl animate-pulse" />
+              ))}
             </div>
-            <h3 className="text-2xl font-bold mb-2">No records found</h3>
-            <p className="text-white/40 mb-8">You haven't analyzed any prescriptions yet or none match your search.</p>
-            <Button onClick={() => navigate('/dashboard')}>Start Analyzing</Button>
-          </Card>
-        ) : (
+          ) : filteredRecords.length === 0 ? (
+            <Card className="flex flex-col items-center justify-center py-20 text-center border-none bg-brand-card/40 backdrop-blur-md">
+              <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6">
+                <HistoryIcon className="w-10 h-10 text-white/20" />
+              </div>
+              <h3 className="text-2xl font-bold mb-2">No records found</h3>
+              <p className="text-white/40 mb-8">You haven't analyzed any prescriptions yet or none match your search.</p>
+              <Button onClick={() => navigate('/dashboard')}>Start Analyzing</Button>
+            </Card>
+          ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <AnimatePresence>
               {filteredRecords.map((record) => (
@@ -203,6 +209,7 @@ const History = () => {
           </div>
         )}
       </Modal>
+      </div>
     </div>
   );
 };
