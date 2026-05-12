@@ -27,8 +27,17 @@ export const AuthProvider = ({ children }) => {
         try {
           // Fetch additional user data from Firestore
           const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+          const isAdmin = currentUser.email === 'samiulhak007@gmail.com';
+          
           if (userDoc.exists()) {
-            setUserData(userDoc.data());
+            const data = userDoc.data();
+            // If email is admin but role isn't, or vice versa (though less likely)
+            if (isAdmin && data.role !== 'admin') {
+              const updatedData = { ...data, role: 'admin' };
+              setUserData(updatedData);
+            } else {
+              setUserData(data);
+            }
           } else {
             // Create user doc if it doesn't exist
             const newData = {
@@ -36,8 +45,8 @@ export const AuthProvider = ({ children }) => {
               name: currentUser.displayName || '',
               email: currentUser.email,
               photoURL: currentUser.photoURL || '',
-              role: 'user',
-              plan: 'free',
+              role: isAdmin ? 'admin' : 'user',
+              plan: isAdmin ? 'pro' : 'free',
               joinedAt: serverTimestamp(),
               lastLoginAt: serverTimestamp(),
               emailVerified: currentUser.emailVerified,
@@ -56,7 +65,6 @@ export const AuthProvider = ({ children }) => {
           }
         } catch (error) {
           console.error("Firestore Error in AuthContext:", error);
-          // Don't crash the app if Firestore rules are not set
         }
       } else {
         setUserData(null);
