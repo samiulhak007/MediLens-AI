@@ -76,32 +76,39 @@ If any field is not visible, set it to null. Never fabricate information. Return
       const response = await axios.post(
         'https://api.groq.com/openai/v1/chat/completions',
         {
-          model: 'llama-3.1-70b-versatile',
+          model: 'llama-3.1-8b-instant',
           messages: [
             {
               role: 'system',
-              content: `You are MediLens AI, an expert medical assistant. The user will provide a medicine name (which might have typos) or a short description of their symptoms. 
-              Even if the user misspells the medicine name (e.g., "paracetomal" for "paracetamol"), you must identify the correct intended medicine.
-              You MUST return exactly 2 medicine entries in an array format inside a JSON object. 
-              The first entry should be the most likely intended medicine. The second should be a related alternative or common variation.
-              Return ONLY a valid JSON object with no markdown formatting, no backticks, and no extra text.
-              Structure:
-{
-  "medicines": [
-    {
-      "name": "Corrected Medicine Name",
-      "generic_name": "",
-      "category": "",
-      "common_uses": [],
-      "how_it_works": "",
-      "side_effects": [],
-      "warnings": [],
-      "alternatives": []
-    },
-    { ... }
-  ]
-}
-Always provide the response in ${language}.`
+              content: `You are a medical assistant. The user will provide a medicine name or symptom. 
+              Identify the intended medicine (even with typos). 
+              Return a JSON object with exactly 2 medicine entries.
+              JSON Structure:
+              {
+                "medicines": [
+                  {
+                    "name": "Medicine Name",
+                    "generic_name": "Generic Name",
+                    "category": "Category",
+                    "common_uses": ["Use 1", "Use 2"],
+                    "how_it_works": "Description",
+                    "side_effects": ["Side Effect 1"],
+                    "warnings": ["Warning 1"],
+                    "alternatives": ["Alt 1"]
+                  },
+                  {
+                    "name": "Alternative Medicine Name",
+                    "generic_name": "Generic Name",
+                    "category": "Category",
+                    "common_uses": ["Use 1"],
+                    "how_it_works": "Description",
+                    "side_effects": ["Side Effect 1"],
+                    "warnings": ["Warning 1"],
+                    "alternatives": ["Alt 1"]
+                  }
+                ]
+              }
+              Always respond in ${language}. Return ONLY the JSON.`
             },
             {
               role: 'user',
@@ -119,7 +126,13 @@ Always provide the response in ${language}.`
         }
       );
 
-      const result = JSON.parse(response.data.choices[0].message.content);
+      const content = response.data.choices[0].message.content;
+      // Robust JSON extraction
+      const jsonStart = content.indexOf('{');
+      const jsonEnd = content.lastIndexOf('}') + 1;
+      const jsonString = content.substring(jsonStart, jsonEnd);
+      
+      const result = JSON.parse(jsonString);
       return result;
     } catch (err) {
       console.error("Groq Search Error:", err);
@@ -128,6 +141,7 @@ Always provide the response in ${language}.`
     } finally {
       setAnalyzing(false);
     }
+  };
   };
 
   return { analyzePrescription, searchMedicine, analyzing, error };
