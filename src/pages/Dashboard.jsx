@@ -3,67 +3,21 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import useGroq from '../hooks/useGroq';
 import Navbar from '../components/layout/Navbar';
-import UploadZone from '../components/dashboard/UploadZone';
 import MedicineSearch from '../components/dashboard/MedicineSearch';
-import AnalysisResults from '../components/dashboard/AnalysisResults';
 import { 
-  PlusCircle, 
   History, 
   CheckCircle2, 
   AlertCircle, 
   Clock, 
-  Calendar,
-  ChevronRight
+  Calendar
 } from 'lucide-react';
 import Card from '../components/ui/Card';
-import Button from '../components/ui/Button';
 import toast from 'react-hot-toast';
-import { db } from '../firebase/config';
-import { collection, addDoc, serverTimestamp, doc, updateDoc, increment } from 'firebase/firestore';
-import { generatePDF } from '../utils/generatePDF';
 
 const Dashboard = () => {
-  const { user, userData } = useAuth();
-  const { analyzePrescription, analyzing } = useGroq();
-  const [imageUrl, setImageUrl] = useState(null);
-  const [analysisResult, setAnalysisResult] = useState(null);
-  const [language, setLanguage] = useState('english');
-  const [activeTab, setActiveTab] = useState('upload'); // 'upload' | 'search'
-  
-  const { searchMedicine } = useGroq();
-
-  const handleUploadComplete = (url) => {
-    setImageUrl(url);
-    toast.success("Image uploaded successfully!");
-  };
-
-  const handleAnalyze = async () => {
-    if (!imageUrl) return;
-    try {
-      const result = await analyzePrescription(imageUrl, language);
-      setAnalysisResult(result);
-      
-      // Save to History
-      await addDoc(collection(db, 'users', user.uid, 'records'), {
-        cloudinaryUrl: imageUrl,
-        analysisResult: result,
-        language: language,
-        createdAt: serverTimestamp(),
-        medicinesCount: result.medications?.length || 0,
-        interactionsCount: result.drug_interactions?.length || 0,
-        isPublic: false
-      });
-
-      // Increment analysis count in user profile
-      await updateDoc(doc(db, 'users', user.uid), {
-        analysisCount: increment(1)
-      });
-
-      toast.success("Analysis complete and saved to history!");
-    } catch (error) {
-      toast.error("Failed to analyze prescription. Please try again.");
-    }
-  };
+  const { userData } = useAuth();
+  const { searchMedicine, analyzing } = useGroq();
+  const [language] = useState('english');
 
   const handleMedicineSearch = async (query) => {
     try {
@@ -75,15 +29,10 @@ const Dashboard = () => {
     }
   };
 
-  const handleDiscard = () => {
-    setImageUrl(null);
-    setAnalysisResult(null);
-  };
-
   const stats = [
-    { label: "Total Analyses", value: userData?.analysisCount || 0, icon: History, color: "text-brand-cyan" },
-    { label: "Medicines Identified", value: "24", icon: CheckCircle2, color: "text-brand-emerald" }, // Mocked or calculated
-    { label: "Interactions Found", value: "2", icon: AlertCircle, color: "text-amber-500" }, // Mocked
+    { label: "Total Searches", value: userData?.analysisCount || 0, icon: History, color: "text-brand-cyan" },
+    { label: "Medicines Identified", value: "24", icon: CheckCircle2, color: "text-brand-emerald" },
+    { label: "Interactions Found", value: "2", icon: AlertCircle, color: "text-amber-500" },
     { label: "Reports Generated", value: userData?.analysisCount || 0, icon: Clock, color: "text-brand-purple" },
   ];
 
@@ -126,85 +75,19 @@ const Dashboard = () => {
 
           {/* Main Content Area */}
           <div className="space-y-12">
-            {!analysisResult ? (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-              >
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
-                  
-                  {/* Tabs */}
-                  <div className="flex items-center bg-white/5 p-1 rounded-xl border border-white/10 backdrop-blur-md">
-                    <button
-                      onClick={() => setActiveTab('upload')}
-                      className={`px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${
-                        activeTab === 'upload' ? 'bg-brand-cyan text-brand-navy' : 'text-white/50 hover:text-white'
-                      }`}
-                    >
-                      Prescription Analysis
-                    </button>
-                    <button
-                      onClick={() => setActiveTab('search')}
-                      className={`px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${
-                        activeTab === 'search' ? 'bg-brand-cyan text-brand-navy' : 'text-white/50 hover:text-white'
-                      }`}
-                    >
-                      AI Medicine Search
-                    </button>
-                  </div>
-
-                  {activeTab === 'upload' && imageUrl && (
-                    <div className="flex items-center space-x-4">
-                      <select 
-                        value={language} 
-                        onChange={(e) => setLanguage(e.target.value)}
-                        className="bg-brand-card/50 backdrop-blur-md border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-cyan"
-                      >
-                        <option value="english">English</option>
-                        <option value="hindi">Hindi</option>
-                        <option value="tamil">Tamil</option>
-                        <option value="spanish">Spanish</option>
-                        <option value="french">French</option>
-                      </select>
-                      <Button 
-                        isLoading={analyzing} 
-                        onClick={handleAnalyze}
-                        disabled={!imageUrl || analyzing}
-                      >
-                        Analyze Now
-                      </Button>
-                    </div>
-                  )}
-                </div>
-                
-                {activeTab === 'upload' ? (
-                  <UploadZone 
-                    onUploadComplete={handleUploadComplete} 
-                    isAnalyzing={analyzing}
-                  />
-                ) : (
-                  <MedicineSearch 
-                    onSearch={handleMedicineSearch}
-                    isAnalyzing={analyzing}
-                  />
-                )}
-              </motion.div>
-            ) : (
-            <div className="space-y-8">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-syne font-bold">Analysis Report</h2>
-                <Button variant="secondary" onClick={handleDiscard}>
-                  Start New
-                </Button>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
+                <h2 className="text-2xl font-bold text-white">AI Medicine Search & Comparison</h2>
               </div>
-              <AnalysisResults 
-                data={analysisResult} 
-                onDiscard={handleDiscard}
-                onDownload={() => generatePDF(analysisResult)}
-                onShare={() => toast.success("Share link generated!")}
+              
+              <MedicineSearch 
+                onSearch={handleMedicineSearch}
+                isAnalyzing={analyzing}
               />
-            </div>
-          )}
+            </motion.div>
           </div>
         </main>
       </div>

@@ -44,7 +44,6 @@ const Navbar = () => {
 
   const navLinks = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'History', path: '/history', icon: History },
     { name: 'Profile', path: '/profile', icon: User },
   ];
 
