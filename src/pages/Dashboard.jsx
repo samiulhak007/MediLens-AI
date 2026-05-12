@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import useGroq from '../hooks/useGroq';
 import Navbar from '../components/layout/Navbar';
 import UploadZone from '../components/dashboard/UploadZone';
+import MedicineSearch from '../components/dashboard/MedicineSearch';
 import AnalysisResults from '../components/dashboard/AnalysisResults';
 import { 
   PlusCircle, 
@@ -12,8 +13,7 @@ import {
   AlertCircle, 
   Clock, 
   Calendar,
-  ChevronRight,
-  Globe
+  ChevronRight
 } from 'lucide-react';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
@@ -28,6 +28,9 @@ const Dashboard = () => {
   const [imageUrl, setImageUrl] = useState(null);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [language, setLanguage] = useState('english');
+  const [activeTab, setActiveTab] = useState('upload'); // 'upload' | 'search'
+  
+  const { searchMedicine } = useGroq();
 
   const handleUploadComplete = (url) => {
     setImageUrl(url);
@@ -62,6 +65,16 @@ const Dashboard = () => {
     }
   };
 
+  const handleMedicineSearch = async (query) => {
+    try {
+      const result = await searchMedicine(query, language);
+      return result;
+    } catch (error) {
+      toast.error("Failed to fetch medicine details.");
+      return null;
+    }
+  };
+
   const handleDiscard = () => {
     setImageUrl(null);
     setAnalysisResult(null);
@@ -75,90 +88,108 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-brand-navy">
-      <Navbar />
+    <div className="min-h-screen bg-brand-navy bg-[url('https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center bg-fixed bg-no-repeat relative">
+      {/* Heavy Glassmorphism Overlay for Medical Theme */}
+      <div className="absolute inset-0 bg-brand-navy/90 backdrop-blur-xl"></div>
       
-      <main className="container mx-auto px-4 pt-32 pb-20">
-        {/* Welcome Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-6">
-          <div>
-            <h1 className="text-4xl font-syne font-extrabold text-white mb-2">
-              Good morning, {userData?.name?.split(' ')[0] || 'User'} 👋
-            </h1>
-            <p className="text-white/50 flex items-center">
-              <Calendar size={14} className="mr-2" />
-              {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-            </p>
-          </div>
-          <div className="flex items-center space-x-3 bg-white/5 p-2 rounded-2xl border border-white/5">
-            <div className="p-3 bg-brand-cyan/10 rounded-xl">
-              <Globe size={20} className="text-brand-cyan" />
+      <div className="relative z-10">
+        <Navbar />
+        
+        <main className="container mx-auto px-4 pt-32 pb-20">
+          {/* Welcome Header */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-6">
+            <div>
+              <h1 className="text-4xl font-syne font-extrabold text-white mb-2">
+                Good morning, {userData?.name?.split(' ')[0] || 'User'} 👋
+              </h1>
+              <p className="text-white/50 flex items-center">
+                <Calendar size={14} className="mr-2" />
+                {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+              </p>
             </div>
-            <div className="pr-4">
-              <p className="text-[10px] text-white/30 uppercase font-bold tracking-widest">Active Plan</p>
-              <p className="text-sm font-bold text-white capitalize">{userData?.plan || 'Free'}</p>
-            </div>
-            <Button size="sm" variant="ghost" className="text-brand-cyan">Upgrade</Button>
           </div>
-        </div>
 
-        {/* Stats Row */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {stats.map((stat, i) => (
-            <Card key={i} className="flex items-center space-x-4 p-4 border-none bg-white/5">
-              <div className={`p-3 rounded-xl bg-white/5 ${stat.color}`}>
-                <stat.icon size={20} />
-              </div>
-              <div>
-                <p className="text-xs text-white/40">{stat.label}</p>
-                <p className="text-xl font-bold text-white">{stat.value}</p>
-              </div>
-            </Card>
-          ))}
-        </div>
+          {/* Stats Row */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            {stats.map((stat, i) => (
+              <Card key={i} className="flex items-center space-x-4 p-4 border-none bg-brand-card/40 backdrop-blur-md">
+                <div className={`p-3 rounded-xl bg-white/5 ${stat.color}`}>
+                  <stat.icon size={20} />
+                </div>
+                <div>
+                  <p className="text-xs text-white/40">{stat.label}</p>
+                  <p className="text-xl font-bold text-white">{stat.value}</p>
+                </div>
+              </Card>
+            ))}
+          </div>
 
-        {/* Main Content Area */}
-        <div className="space-y-12">
-          {!analysisResult ? (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-syne font-bold flex items-center">
-                  <PlusCircle className="mr-3 text-brand-cyan" />
-                  New Analysis
-                </h2>
-                {imageUrl && (
-                  <div className="flex items-center space-x-4">
-                    <select 
-                      value={language} 
-                      onChange={(e) => setLanguage(e.target.value)}
-                      className="bg-brand-card border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-cyan"
+          {/* Main Content Area */}
+          <div className="space-y-12">
+            {!analysisResult ? (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
+                  
+                  {/* Tabs */}
+                  <div className="flex items-center bg-white/5 p-1 rounded-xl border border-white/10 backdrop-blur-md">
+                    <button
+                      onClick={() => setActiveTab('upload')}
+                      className={`px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${
+                        activeTab === 'upload' ? 'bg-brand-cyan text-brand-navy' : 'text-white/50 hover:text-white'
+                      }`}
                     >
-                      <option value="english">English</option>
-                      <option value="hindi">Hindi</option>
-                      <option value="tamil">Tamil</option>
-                      <option value="spanish">Spanish</option>
-                      <option value="french">French</option>
-                    </select>
-                    <Button 
-                      isLoading={analyzing} 
-                      onClick={handleAnalyze}
-                      disabled={!imageUrl || analyzing}
+                      Prescription Analysis
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('search')}
+                      className={`px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${
+                        activeTab === 'search' ? 'bg-brand-cyan text-brand-navy' : 'text-white/50 hover:text-white'
+                      }`}
                     >
-                      Analyze Now
-                    </Button>
+                      AI Medicine Search
+                    </button>
                   </div>
+
+                  {activeTab === 'upload' && imageUrl && (
+                    <div className="flex items-center space-x-4">
+                      <select 
+                        value={language} 
+                        onChange={(e) => setLanguage(e.target.value)}
+                        className="bg-brand-card/50 backdrop-blur-md border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-cyan"
+                      >
+                        <option value="english">English</option>
+                        <option value="hindi">Hindi</option>
+                        <option value="tamil">Tamil</option>
+                        <option value="spanish">Spanish</option>
+                        <option value="french">French</option>
+                      </select>
+                      <Button 
+                        isLoading={analyzing} 
+                        onClick={handleAnalyze}
+                        disabled={!imageUrl || analyzing}
+                      >
+                        Analyze Now
+                      </Button>
+                    </div>
+                  )}
+                </div>
+                
+                {activeTab === 'upload' ? (
+                  <UploadZone 
+                    onUploadComplete={handleUploadComplete} 
+                    isAnalyzing={analyzing}
+                  />
+                ) : (
+                  <MedicineSearch 
+                    onSearch={handleMedicineSearch}
+                    isAnalyzing={analyzing}
+                  />
                 )}
-              </div>
-              
-              <UploadZone 
-                onUploadComplete={handleUploadComplete} 
-                isAnalyzing={analyzing}
-              />
-            </motion.div>
-          ) : (
+              </motion.div>
+            ) : (
             <div className="space-y-8">
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-syne font-bold">Analysis Report</h2>
@@ -174,8 +205,9 @@ const Dashboard = () => {
               />
             </div>
           )}
-        </div>
-      </main>
+          </div>
+        </main>
+      </div>
     </div>
   );
 };

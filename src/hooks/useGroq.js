@@ -69,7 +69,58 @@ If any field is not visible, set it to null. Never fabricate information. Return
     }
   };
 
-  return { analyzePrescription, analyzing, error };
+  const searchMedicine = async (query, language = 'english') => {
+    setAnalyzing(true);
+    setError(null);
+    try {
+      const response = await axios.post(
+        'https://api.groq.com/openai/v1/chat/completions',
+        {
+          model: 'llama3-70b-8192',
+          messages: [
+            {
+              role: 'system',
+              content: `You are MediLens AI, an expert medical assistant. The user will provide a medicine name or a short description of their symptoms. Identify the medicine or suggest appropriate over-the-counter options if they ask for symptoms. Return ONLY a valid JSON object with this exact structure:
+{
+  "name": "",
+  "generic_name": "",
+  "category": "",
+  "common_uses": [],
+  "how_it_works": "",
+  "side_effects": [],
+  "warnings": [],
+  "alternatives": []
+}
+Always provide the response in ${language}. Never fabricate information. Return ONLY the JSON object.`
+            },
+            {
+              role: 'user',
+              content: query
+            }
+          ],
+          temperature: 0.1,
+          response_format: { type: "json_object" }
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${import.meta.env.VITE_GROQ_API_KEY}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      const result = JSON.parse(response.data.choices[0].message.content);
+      return result;
+    } catch (err) {
+      console.error("Groq Search Error:", err);
+      setError(err.message);
+      throw err;
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  return { analyzePrescription, searchMedicine, analyzing, error };
 };
 
 export default useGroq;
