@@ -9,6 +9,10 @@ import Landing from './pages/Landing';
 import Login from './pages/Login';
 import VerifyEmail from './pages/VerifyEmail';
 import Dashboard from './pages/Dashboard';
+import Chat from './pages/Chat';
+import Reminders from './pages/Reminders';
+import EmergencyCard from './pages/EmergencyCard';
+import HealthScore from './pages/HealthScore';
 import History from './pages/History';
 import Profile from './pages/Profile';
 import Admin from './pages/Admin';
@@ -43,6 +47,42 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Dashboard />
+                </ProtectedRoute>
+              } 
+            />
+
+            <Route 
+              path="/chat" 
+              element={
+                <ProtectedRoute>
+                  <Chat />
+                </ProtectedRoute>
+              } 
+            />
+
+            <Route 
+              path="/reminders" 
+              element={
+                <ProtectedRoute>
+                  <Reminders />
+                </ProtectedRoute>
+              } 
+            />
+
+            <Route 
+              path="/emergency-card" 
+              element={
+                <ProtectedRoute>
+                  <EmergencyCard />
+                </ProtectedRoute>
+              } 
+            />
+
+            <Route 
+              path="/health-score" 
+              element={
+                <ProtectedRoute>
+                  <HealthScore />
                 </ProtectedRoute>
               } 
             />
