@@ -152,9 +152,9 @@ If any field is not visible, set it to null. Never fabricate information. Return
       const response = await axios.post(
         'https://api.groq.com/openai/v1/chat/completions',
         {
-          model: 'llama3-70b-8192',
+          model: 'llama-3.3-70b-versatile',
           messages: [systemMessage, ...messages],
-          temperature: 0.5,
+          temperature: 0.7,
           max_tokens: 1024
         },
         {
@@ -167,6 +167,9 @@ If any field is not visible, set it to null. Never fabricate information. Return
 
       return response.data.choices[0].message.content;
     } catch (err) {
+      if (err.response) {
+        console.error("Groq API Error Details:", err.response.data);
+      }
       console.error("Groq Chat Error:", err);
       setError(err.message);
       throw err;
