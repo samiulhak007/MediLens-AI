@@ -82,7 +82,8 @@ If any field is not visible, set it to null. Never fabricate information. Return
               role: 'system',
               content: `You are a medical assistant. The user will provide a medicine name or symptom. 
               Identify the intended medicine (even with typos). 
-              Return a JSON object with exactly 2 medicine entries.
+              Return a JSON object with exactly 4 medicine entries for comparison.
+              The first should be the direct match, the others should be related or alternative medications for comparison.
               JSON Structure:
               {
                 "medicines": [
@@ -96,16 +97,7 @@ If any field is not visible, set it to null. Never fabricate information. Return
                     "warnings": ["Warning 1"],
                     "alternatives": ["Alt 1"]
                   },
-                  {
-                    "name": "Alternative Medicine Name",
-                    "generic_name": "Generic Name",
-                    "category": "Category",
-                    "common_uses": ["Use 1"],
-                    "how_it_works": "Description",
-                    "side_effects": ["Side Effect 1"],
-                    "warnings": ["Warning 1"],
-                    "alternatives": ["Alt 1"]
-                  }
+                  ... repeat for 4 medicines ...
                 ]
               }
               Always respond in ${language}. Return ONLY the JSON.`
