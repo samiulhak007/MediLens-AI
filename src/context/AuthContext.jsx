@@ -24,34 +24,39 @@ export const AuthProvider = ({ children }) => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
-        // Fetch additional user data from Firestore
-        const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-        if (userDoc.exists()) {
-          setUserData(userDoc.data());
-        } else {
-          // Create user doc if it doesn't exist
-          const newData = {
-            uid: currentUser.uid,
-            name: currentUser.displayName || '',
-            email: currentUser.email,
-            photoURL: currentUser.photoURL || '',
-            role: 'user',
-            plan: 'free',
-            joinedAt: serverTimestamp(),
-            lastLoginAt: serverTimestamp(),
-            emailVerified: currentUser.emailVerified,
-            loginMethod: currentUser.providerData[0]?.providerId || 'email',
-            analysisCount: 0,
-            language: 'english',
-            allergies: [],
-            conditions: [],
-            notificationPrefs: {
-              email: true,
-              browser: true
-            }
-          };
-          await setDoc(doc(db, 'users', currentUser.uid), newData);
-          setUserData(newData);
+        try {
+          // Fetch additional user data from Firestore
+          const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+          if (userDoc.exists()) {
+            setUserData(userDoc.data());
+          } else {
+            // Create user doc if it doesn't exist
+            const newData = {
+              uid: currentUser.uid,
+              name: currentUser.displayName || '',
+              email: currentUser.email,
+              photoURL: currentUser.photoURL || '',
+              role: 'user',
+              plan: 'free',
+              joinedAt: serverTimestamp(),
+              lastLoginAt: serverTimestamp(),
+              emailVerified: currentUser.emailVerified,
+              loginMethod: currentUser.providerData[0]?.providerId || 'email',
+              analysisCount: 0,
+              language: 'english',
+              allergies: [],
+              conditions: [],
+              notificationPrefs: {
+                email: true,
+                browser: true
+              }
+            };
+            await setDoc(doc(db, 'users', currentUser.uid), newData);
+            setUserData(newData);
+          }
+        } catch (error) {
+          console.error("Firestore Error in AuthContext:", error);
+          // Don't crash the app if Firestore rules are not set
         }
       } else {
         setUserData(null);
